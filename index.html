@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Coin Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #98D8C8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            max-width: 900px;
+        }
+
+        #gameCanvas {
+            border: 3px solid #333;
+            border-radius: 10px;
+            display: block;
+            background: #f0f0f0;
+        }
+
+        #ui {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stat {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat span {
+            color: #FFD700;
+        }
+
+        #instructions {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        #instructions h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        #instructions p {
+            color: #856404;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modalContent {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        #modalContent h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        #modalContent p {
+            color: #666;
+            margin: 15px 0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .emoji {
+            font-size: 24px;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="ui">
+            <div class="stat">🪙 Coins: <span id="coinCount">0</span></div>
+            <div class="stat">🍖 Food: <span id="foodCount">0</span></div>
+            <div class="stat">📍 Level: <span id="levelCount">Training</span></div>
+        </div>
+        <div id="instructions">
+            <h3>🎮 How to Play</h3>
+            <p>Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move your cat</p>
+            <p>Collect 🪙 coins and 🍖 food for your family!</p>
+            <p>Talk to other cats (press <strong>SPACE</strong>) to get permission to pass</p>
+        </div>
+    </div>
+
+    <div id="modal">
+        <div id="modalContent">
+            <h2 id="modalTitle">Welcome!</h2>
+            <p id="modalText">Loading...</p>
+            <div id="modalButtons"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game state
+        const game = {
+            state: 'training', // training, playing, dialogue, party
+            level: 0,
+            coins: 0,
+            food: 0,
+            currentDialogue: null,
+            partyTime: 0
+        };
+
+        // Player
+        const player = {
+            x: 100,
+            y: 500,
+            width: 40,
+            height: 40,
+            speed: 3,
+            dx: 0,
+            dy: 0,
+            color: '#FF8C00'
+        };
+
+        // Keys
+        const keys = {
+            ArrowUp: false,
+            ArrowDown: false,
+            ArrowLeft: false,
+            ArrowRight: false,
+            w: false,
+            a: false,
+            s: false,
+            d: false,
+            ' ': false
+        };
+
+        // Level configurations
+        const levels = [
+            {
+                name: 'Training',
+                coins: [
+                    { x: 200, y: 450, collected: false },
+                    { x: 300, y: 400, collected: false },
+                    { x: 400, y: 350, collected: false }
+                ],
+                food: [
+                    { x: 250, y: 500, collected: false },
+                    { x: 350, y: 450, collected: false }
+                ],
+                cats: [],
+                homeX: 700
+            },
+            {
+                name: 'Level 1',
+                coins: [
+                    { x: 200, y: 450, collected: false },
+                    { x: 300, y: 350, collected: false },
+                    { x: 400, y: 450, collected: false },
+                    { x: 500, y: 350, collected: false }
+                ],
+                food: [
+                    { x: 250, y: 500, collected: false },
+                    { x: 450, y: 400, collected: false },
+                    { x: 600, y: 450, collected: false }
+                ],
+                cats: [
+                    { x: 350, y: 300, name: 'Whiskers', friendly: true }
+                ],
+                homeX: 700
+            },
+            {
+                name: 'Level 2',
+                coins: [
+                    { x: 180, y: 450, collected: false },
+                    { x: 280, y: 350, collected: false },
+                    { x: 380, y: 250, collected: false },
+                    { x: 480, y: 350, collected: false },
+                    { x: 580, y: 450, collected: false }
+                ],
+                food: [
+                    { x: 230, y: 500, collected: false },
+                    { x: 330, y: 400, collected: false },
+                    { x: 430, y: 300, collected: false },
+                    { x: 530, y: 400, collected: false }
+                ],
+                cats: [
+                    { x: 300, y: 280, name: 'Mittens', friendly: true },
+                    { x: 500, y: 280, name: 'Grumpy', friendly: Math.random() > 0.5 }
+                ],
+                homeX: 700
+            },
+            {
+                name: 'Level 3',
+                coins: [
+                    { x: 150, y: 500, collected: false },
+                    { x: 250, y: 400, collected: false },
+                    { x: 350, y: 300, collected: false },
+                    { x: 450, y: 200, collected: false },
+                    { x: 550, y: 300, collected: false },
+                    { x: 650, y: 400, collected: false }
+                ],
+                food: [
+                    { x: 200, y: 450, collected: false },
+                    { x: 300, y: 350, collected: false },
+                    { x: 400, y: 250, collected: false },
+                    { x: 500, y: 350, collected: false },
+                    { x: 600, y: 450, collected: false }
+                ],
+                cats: [
+                    { x: 250, y: 320, name: 'Shadow', friendly: Math.random() > 0.3 },
+                    { x: 400, y: 180, name: 'Luna', friendly: true },
+                    { x: 550, y: 250, name: 'Tiger', friendly: Math.random() > 0.5 }
+                ],
+                homeX: 700
+            }
+        ];
+
+        let currentLevel = levels[0];
+
+        // Initialize game
+        function init() {
+            showModal(
+                '🐱 Welcome to Cat Coin Adventure!',
+                'You are a young cat starting at the river. Your mission is to collect coins and food for your family at home! But watch out - other cats might block your way. Let\'s start with some training!',
+                [{ text: 'Start Training!', action: startTraining }]
+            );
+        }
+
+        function startTraining() {
+            hideModal();
+            game.state = 'playing';
+            game.level = 0;
+            resetLevel();
+            updateUI();
+        }
+
+        function resetLevel() {
+            currentLevel = JSON.parse(JSON.stringify(levels[game.level]));
+            player.x = 100;
+            player.y = 500;
+            player.dx = 0;
+            player.dy = 0;
+        }
+
+        function resetToRiver() {
+            player.x = 100;
+            player.y = 500;
+            player.dx = 0;
+            player.dy = 0;
+        }
+
+        // Input handlers
+        document.addEventListener('keydown', (e) => {
+            if (e.key in keys) {
+                keys[e.key] = true;
+                e.preventDefault();
+            }
+
+            if (e.key === ' ' && game.state === 'playing') {
+                checkCatInteraction();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key in keys) {
+                keys[e.key] = false;
+                e.preventDefault();
+            }
+        });
+
+        // Movement
+        function updatePlayer() {
+            if (game.state !== 'playing') return;
+
+            player.dx = 0;
+            player.dy = 0;
+
+            if (keys.ArrowLeft || keys.a) player.dx = -player.speed;
+            if (keys.ArrowRight || keys.d) player.dx = player.speed;
+            if (keys.ArrowUp || keys.w) player.dy = -player.speed;
+            if (keys.ArrowDown || keys.s) player.dy = player.speed;
+
+            player.x += player.dx;
+            player.y += player.dy;
+
+            // Boundaries
+            player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+            player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
+
+            // Collect coins
+            currentLevel.coins.forEach(coin => {
+                if (!coin.collected && checkCollision(player, { ...coin, width: 25, height: 25 })) {
+                    coin.collected = true;
+                    game.coins++;
+                    updateUI();
+                }
+            });
+
+            // Collect food
+            currentLevel.food.forEach(food => {
+                if (!food.collected && checkCollision(player, { ...food, width: 25, height: 25 })) {
+                    food.collected = true;
+                    game.food++;
+                    updateUI();
+                }
+            });
+
+            // Check if reached home
+            if (player.x + player.width >= currentLevel.homeX) {
+                reachHome();
+            }
+        }
+
+        function checkCollision(obj1, obj2) {
+            return obj1.x < obj2.x + obj2.width &&
+                   obj1.x + obj1.width > obj2.x &&
+                   obj1.y < obj2.y + obj2.height &&
+                   obj1.y + obj1.height > obj2.y;
+        }
+
+        function checkCatInteraction() {
+            currentLevel.cats.forEach((cat, index) => {
+                const distance = Math.sqrt(
+                    Math.pow(player.x - cat.x, 2) +
+                    Math.pow(player.y - cat.y, 2)
+                );
+
+                if (distance < 80 && !cat.talked) {
+                    cat.talked = true;
+                    interactWithCat(cat);
+                }
+            });
+        }
+
+        function interactWithCat(cat) {
+            game.state = 'dialogue';
+
+            if (cat.friendly) {
+                showModal(
+                    `🐱 ${cat.name} says:`,
+                    `"Hello there, young one! You look determined. Of course you can pass! Here, take these 50 coins for your journey!"`,
+                    [{
+                        text: 'Thank you!',
+                        action: () => {
+                            game.coins += 50;
+                            updateUI();
+                            hideModal();
+                            game.state = 'playing';
+                        }
+                    }]
+                );
+            } else {
+                showModal(
+                    `😾 ${cat.name} says:`,
+                    `"I'm not feeling generous today. You cannot pass! Go back to the river and try a different path!"`,
+                    [{
+                        text: 'Oh no...',
+                        action: () => {
+                            hideModal();
+                            game.state = 'playing';
+                            resetToRiver();
+                        }
+                    }]
+                );
+            }
+        }
+
+        function reachHome() {
+            game.state = 'party';
+            game.partyTime = 0;
+
+            const totalItems = game.coins + game.food;
+            const isLastLevel = game.level >= levels.length - 1;
+
+            setTimeout(() => {
+                if (isLastLevel) {
+                    showModal(
+                        '🎉 Congratulations! 🎉',
+                        `You made it home with ${game.coins} coins and ${game.food} food items! Your family is so proud! You've completed all levels!`,
+                        [{
+                            text: 'Play Again',
+                            action: () => {
+                                game.level = 0;
+                                game.coins = 0;
+                                game.food = 0;
+                                hideModal();
+                                resetLevel();
+                                game.state = 'playing';
+                                updateUI();
+                            }
+                        }]
+                    );
+                } else {
+                    showModal(
+                        '🎉 Level Complete! 🎉',
+                        `You made it home with ${game.coins} coins and ${game.food} food items! Your family is celebrating! Ready for the next level?`,
+                        [{
+                            text: 'Next Level',
+                            action: () => {
+                                game.level++;
+                                hideModal();
+                                resetLevel();
+                                game.state = 'playing';
+                                updateUI();
+                            }
+                        }]
+                    );
+                }
+            }, 2000);
+        }
+
+        // Drawing functions
+        function drawBackground() {
+            // River (left side)
+            ctx.fillStyle = '#4A90E2';
+            ctx.fillRect(0, 0, 150, canvas.height);
+
+            // Water waves
+            ctx.fillStyle = '#6BA8E8';
+            for (let i = 0; i < 10; i++) {
+                const y = (i * 60 + Date.now() / 10) % canvas.height;
+                ctx.beginPath();
+                ctx.arc(75, y, 15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Path (middle)
+            ctx.fillStyle = '#8B7355';
+            ctx.fillRect(150, 0, canvas.width - 250, canvas.height);
+
+            // Grass details on path
+            ctx.fillStyle = '#6B8E23';
+            for (let i = 0; i < 50; i++) {
+                const x = 150 + Math.random() * (canvas.width - 250);
+                const y = Math.random() * canvas.height;
+                ctx.fillRect(x, y, 3, 8);
+            }
+
+            // Home (right side)
+            ctx.fillStyle = '#FFD700';
+            ctx.fillRect(currentLevel.homeX, 0, canvas.width - currentLevel.homeX, canvas.height);
+
+            // House
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(currentLevel.homeX + 20, canvas.height - 200, 60, 80);
+            ctx.fillStyle = '#FF6347';
+            ctx.beginPath();
+            ctx.moveTo(currentLevel.homeX + 20, canvas.height - 200);
+            ctx.lineTo(currentLevel.homeX + 50, canvas.height - 240);
+            ctx.lineTo(currentLevel.homeX + 80, canvas.height - 200);
+            ctx.closePath();
+            ctx.fill();
+
+            // Door
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(currentLevel.homeX + 35, canvas.height - 150, 30, 50);
+
+            // Window
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(currentLevel.homeX + 40, canvas.height - 180, 20, 20);
+        }
+
+        function drawPlayer() {
+            // Cat body
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Ears
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.moveTo(player.x + 5, player.y + 5);
+            ctx.lineTo(player.x + 5, player.y - 5);
+            ctx.lineTo(player.x + 12, player.y + 5);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(player.x + player.width - 5, player.y + 5);
+            ctx.lineTo(player.x + player.width - 5, player.y - 5);
+            ctx.lineTo(player.x + player.width - 12, player.y + 5);
+            ctx.fill();
+
+            // Eyes
+            ctx.fillStyle = 'white';
+            ctx.fillRect(player.x + 10, player.y + 12, 8, 8);
+            ctx.fillRect(player.x + 22, player.y + 12, 8, 8);
+            ctx.fillStyle = 'black';
+            ctx.fillRect(player.x + 13, player.y + 15, 3, 3);
+            ctx.fillRect(player.x + 25, player.y + 15, 3, 3);
+
+            // Tail
+            ctx.strokeStyle = player.color;
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(player.x, player.y + player.height - 10);
+            ctx.quadraticCurveTo(
+                player.x - 15,
+                player.y + player.height - 5,
+                player.x - 20,
+                player.y + player.height - 20
+            );
+            ctx.stroke();
+        }
+
+        function drawCoins() {
+            currentLevel.coins.forEach(coin => {
+                if (!coin.collected) {
+                    // Coin
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(coin.x, coin.y, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#FFA500';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Sparkle
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(coin.x - 3, coin.y - 8, 2, 4);
+                    ctx.fillRect(coin.x + 3, coin.y - 4, 2, 4);
+                }
+            });
+        }
+
+        function drawFood() {
+            currentLevel.food.forEach(food => {
+                if (!food.collected) {
+                    // Meat/bone
+                    ctx.fillStyle = '#CD853F';
+                    ctx.fillRect(food.x - 10, food.y - 8, 20, 16);
+
+                    ctx.fillStyle = '#DEB887';
+                    ctx.beginPath();
+                    ctx.arc(food.x - 10, food.y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(food.x + 10, food.y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+        }
+
+        function drawCats() {
+            currentLevel.cats.forEach(cat => {
+                const catColor = cat.friendly ? '#9370DB' : '#696969';
+
+                // Cat body
+                ctx.fillStyle = catColor;
+                ctx.fillRect(cat.x, cat.y, 40, 40);
+
+                // Ears
+                ctx.beginPath();
+                ctx.moveTo(cat.x + 5, cat.y + 5);
+                ctx.lineTo(cat.x + 5, cat.y - 5);
+                ctx.lineTo(cat.x + 12, cat.y + 5);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(cat.x + 35, cat.y + 5);
+                ctx.lineTo(cat.x + 35, cat.y - 5);
+                ctx.lineTo(cat.x + 28, cat.y + 5);
+                ctx.fill();
+
+                // Eyes
+                ctx.fillStyle = 'white';
+                ctx.fillRect(cat.x + 10, cat.y + 12, 8, 8);
+                ctx.fillRect(cat.x + 22, cat.y + 12, 8, 8);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(cat.x + 13, cat.y + 15, 3, 3);
+                ctx.fillRect(cat.x + 25, cat.y + 15, 3, 3);
+
+                // Name tag
+                ctx.fillStyle = 'white';
+                ctx.fillRect(cat.x - 10, cat.y - 20, 60, 15);
+                ctx.fillStyle = 'black';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(cat.name, cat.x + 20, cat.y - 9);
+
+                // Interaction hint
+                const distance = Math.sqrt(
+                    Math.pow(player.x - cat.x, 2) +
+                    Math.pow(player.y - cat.y, 2)
+                );
+
+                if (distance < 80 && !cat.talked && game.state === 'playing') {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.fillRect(cat.x - 20, cat.y + 50, 80, 25);
+                    ctx.fillStyle = 'black';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Press SPACE', cat.x + 20, cat.y + 67);
+                }
+            });
+        }
+
+        function drawParty() {
+            if (game.state !== 'party') return;
+
+            game.partyTime++;
+
+            // Confetti
+            for (let i = 0; i < 20; i++) {
+                const x = Math.random() * canvas.width;
+                const y = (game.partyTime * 3 + i * 30) % canvas.height;
+                const color = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'][i % 5];
+
+                ctx.fillStyle = color;
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(game.partyTime * 0.1 + i);
+                ctx.fillRect(-5, -5, 10, 10);
+                ctx.restore();
+            }
+
+            // Balloons
+            for (let i = 0; i < 5; i++) {
+                const x = currentLevel.homeX + 30 + i * 15;
+                const y = 100 - Math.sin(game.partyTime * 0.1 + i) * 10;
+                const color = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181'][i];
+
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x, y, 15, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x, y + 15);
+                ctx.lineTo(x, y + 40);
+                ctx.stroke();
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawBackground();
+            drawCoins();
+            drawFood();
+            drawCats();
+            drawPlayer();
+            drawParty();
+        }
+
+        function updateUI() {
+            document.getElementById('coinCount').textContent = game.coins;
+            document.getElementById('foodCount').textContent = game.food;
+            document.getElementById('levelCount').textContent =
+                game.level === 0 ? 'Training' : `${game.level} of ${levels.length - 1}`;
+        }
+
+        // Modal functions
+        function showModal(title, text, buttons) {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalText = document.getElementById('modalText');
+            const modalButtons = document.getElementById('modalButtons');
+
+            modalTitle.textContent = title;
+            modalText.textContent = text;
+            modalButtons.innerHTML = '';
+
+            buttons.forEach(btn => {
+                const button = document.createElement('button');
+                button.className = 'button';
+                button.textContent = btn.text;
+                button.onclick = btn.action;
+                modalButtons.appendChild(button);
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        function hideModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Game loop
+        function gameLoop() {
+            updatePlayer();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start game
+        init();
+        gameLoop();
+    </script>
+</body>
+</html>
