@@ -19,6 +19,7 @@
             align-items: center;
             min-height: 100vh;
             overflow: hidden;
+            padding: 10px;
         }
 
         #gameContainer {
@@ -27,6 +28,7 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             padding: 20px;
             max-width: 900px;
+            width: 100%;
         }
 
         #gameCanvas {
@@ -34,6 +36,9 @@
             border-radius: 10px;
             display: block;
             background: #f0f0f0;
+            max-width: 100%;
+            height: auto;
+            touch-action: none;
         }
 
         #ui {
@@ -145,6 +150,75 @@
             font-size: 24px;
             margin: 0 5px;
         }
+
+        #mobileControls {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        #talkButton {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 50%;
+            font-size: 32px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #talkButton:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            #gameContainer {
+                padding: 10px;
+            }
+
+            .stat {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+
+            #instructions {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            #instructions h3 {
+                font-size: 14px;
+            }
+
+            #instructions p {
+                font-size: 12px;
+            }
+
+            #mobileControls {
+                display: block;
+            }
+
+            #modalContent {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            #modalContent h2 {
+                font-size: 22px;
+            }
+
+            #modalContent p {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -157,10 +231,14 @@
         </div>
         <div id="instructions">
             <h3>🎮 How to Play</h3>
-            <p>Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move your cat</p>
+            <p><strong>Desktop:</strong> Arrow Keys or WASD to move | SPACE to talk</p>
+            <p><strong>Mobile:</strong> Touch and drag to move | Tap button to talk</p>
             <p>Collect 🪙 coins and 🍖 food for your family!</p>
-            <p>Talk to other cats (press <strong>SPACE</strong>) to get permission to pass</p>
         </div>
+    </div>
+
+    <div id="mobileControls">
+        <button id="talkButton">💬</button>
     </div>
 
     <div id="modal">
@@ -344,6 +422,50 @@
             }
         });
 
+        // Touch controls
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchCurrentX = 0;
+        let touchCurrentY = 0;
+        let isTouching = false;
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            touchStartX = touch.clientX - rect.left;
+            touchStartY = touch.clientY - rect.top;
+            touchCurrentX = touchStartX;
+            touchCurrentY = touchStartY;
+            isTouching = true;
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!isTouching) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            touchCurrentX = touch.clientX - rect.left;
+            touchCurrentY = touch.clientY - rect.top;
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isTouching = false;
+            touchStartX = 0;
+            touchStartY = 0;
+            touchCurrentX = 0;
+            touchCurrentY = 0;
+        }, { passive: false });
+
+        // Mobile talk button
+        document.getElementById('talkButton').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (game.state === 'playing') {
+                checkCatInteraction();
+            }
+        });
+
         // Movement
         function updatePlayer() {
             if (game.state !== 'playing') return;
@@ -351,10 +473,33 @@
             player.dx = 0;
             player.dy = 0;
 
+            // Keyboard controls
             if (keys.ArrowLeft || keys.a) player.dx = -player.speed;
             if (keys.ArrowRight || keys.d) player.dx = player.speed;
             if (keys.ArrowUp || keys.w) player.dy = -player.speed;
             if (keys.ArrowDown || keys.s) player.dy = player.speed;
+
+            // Touch controls
+            if (isTouching) {
+                const deltaX = touchCurrentX - touchStartX;
+                const deltaY = touchCurrentY - touchStartY;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                if (distance > 10) { // Dead zone
+                    const scaleX = canvas.width / canvas.offsetWidth;
+                    const scaleY = canvas.height / canvas.offsetHeight;
+
+                    player.dx = (deltaX * scaleX) / 10;
+                    player.dy = (deltaY * scaleY) / 10;
+
+                    // Clamp speed
+                    const speed = Math.sqrt(player.dx * player.dx + player.dy * player.dy);
+                    if (speed > player.speed) {
+                        player.dx = (player.dx / speed) * player.speed;
+                        player.dy = (player.dy / speed) * player.speed;
+                    }
+                }
+            }
 
             player.x += player.dx;
             player.y += player.dy;
