@@ -233,7 +233,7 @@
             <h3>🎮 How to Play</h3>
             <p><strong>Desktop:</strong> Arrow Keys or WASD to move | SPACE to talk</p>
             <p><strong>Mobile:</strong> Touch and drag to move | Tap button to talk</p>
-            <p>Collect 🪙 coins and 🍖 food for your family!</p>
+            <p>Collect 🪙 coins and 🐟 fish for your family!</p>
         </div>
     </div>
 
@@ -252,6 +252,9 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+
+        // Disable image smoothing for crisp pixel art
+        ctx.imageSmoothingEnabled = false;
 
         // Game state
         const game = {
@@ -632,112 +635,281 @@
 
         // Drawing functions
         function drawBackground() {
-            // River (left side)
-            ctx.fillStyle = '#4A90E2';
-            ctx.fillRect(0, 0, 150, canvas.height);
-
-            // Water waves
-            ctx.fillStyle = '#6BA8E8';
-            for (let i = 0; i < 10; i++) {
-                const y = (i * 60 + Date.now() / 10) % canvas.height;
-                ctx.beginPath();
-                ctx.arc(75, y, 15, 0, Math.PI * 2);
-                ctx.fill();
+            // River (left side) - 16-bit style water
+            const waterColors = ['#1E40AF', '#2563EB', '#3B82F6'];
+            for (let y = 0; y < canvas.height; y += 16) {
+                for (let x = 0; x < 150; x += 16) {
+                    ctx.fillStyle = waterColors[Math.floor((x + y) / 16) % 3];
+                    ctx.fillRect(x, y, 16, 16);
+                }
             }
 
-            // Path (middle)
-            ctx.fillStyle = '#8B7355';
-            ctx.fillRect(150, 0, canvas.width - 250, canvas.height);
+            // Animated water waves (16-bit style)
+            const waveOffset = Math.floor(Date.now() / 200) % 16;
+            ctx.fillStyle = '#60A5FA';
+            for (let y = 0; y < canvas.height; y += 32) {
+                ctx.fillRect(0, y + waveOffset, 150, 4);
+                ctx.fillRect(0, y + waveOffset + 16, 150, 4);
+            }
 
-            // Grass details on path
+            // Path (middle) - Tile-based
+            const dirtColors = ['#8B7355', '#A0826D', '#6B5842'];
+            for (let y = 0; y < canvas.height; y += 16) {
+                for (let x = 150; x < canvas.width - 100; x += 16) {
+                    const tileIndex = ((x / 16) + (y / 16)) % 3;
+                    ctx.fillStyle = dirtColors[Math.floor(tileIndex)];
+                    ctx.fillRect(x, y, 16, 16);
+
+                    // Add texture
+                    if (Math.random() > 0.7) {
+                        ctx.fillStyle = '#5D4A3A';
+                        ctx.fillRect(x + 4, y + 4, 4, 4);
+                    }
+                }
+            }
+
+            // Grass tufts (16-bit pixel art)
             ctx.fillStyle = '#6B8E23';
-            for (let i = 0; i < 50; i++) {
-                const x = 150 + Math.random() * (canvas.width - 250);
-                const y = Math.random() * canvas.height;
-                ctx.fillRect(x, y, 3, 8);
+            for (let i = 0; i < 30; i++) {
+                const gx = 150 + (i * 20) % (canvas.width - 250);
+                const gy = (i * 37) % canvas.height;
+                ctx.fillRect(gx, gy, 4, 8);
+                ctx.fillRect(gx - 4, gy + 4, 4, 4);
+                ctx.fillRect(gx + 4, gy + 4, 4, 4);
             }
 
-            // Home (right side)
-            ctx.fillStyle = '#FFD700';
-            ctx.fillRect(currentLevel.homeX, 0, canvas.width - currentLevel.homeX, canvas.height);
+            // Home area (right side) - 16-bit golden tiles
+            for (let y = 0; y < canvas.height; y += 16) {
+                for (let x = currentLevel.homeX; x < canvas.width; x += 16) {
+                    const shade = ((x + y) / 16) % 2 === 0 ? '#FFD700' : '#FFC800';
+                    ctx.fillStyle = shade;
+                    ctx.fillRect(x, y, 16, 16);
+                }
+            }
 
-            // House
+            // 16-bit pixel art house
+            const houseX = currentLevel.homeX + 20;
+            const houseY = canvas.height - 200;
+
+            // House walls
             ctx.fillStyle = '#8B4513';
-            ctx.fillRect(currentLevel.homeX + 20, canvas.height - 200, 60, 80);
-            ctx.fillStyle = '#FF6347';
-            ctx.beginPath();
-            ctx.moveTo(currentLevel.homeX + 20, canvas.height - 200);
-            ctx.lineTo(currentLevel.homeX + 50, canvas.height - 240);
-            ctx.lineTo(currentLevel.homeX + 80, canvas.height - 200);
-            ctx.closePath();
-            ctx.fill();
-
-            // Door
+            ctx.fillRect(houseX, houseY, 60, 80);
             ctx.fillStyle = '#654321';
-            ctx.fillRect(currentLevel.homeX + 35, canvas.height - 150, 30, 50);
+            for (let i = 0; i < 60; i += 8) {
+                for (let j = 0; j < 80; j += 8) {
+                    if ((i + j) % 16 === 0) {
+                        ctx.fillRect(houseX + i, houseY + j, 4, 4);
+                    }
+                }
+            }
 
-            // Window
-            ctx.fillStyle = '#87CEEB';
-            ctx.fillRect(currentLevel.homeX + 40, canvas.height - 180, 20, 20);
+            // Roof (pixel art)
+            ctx.fillStyle = '#DC2626';
+            ctx.fillRect(houseX - 8, houseY, 76, 8);
+            ctx.fillRect(houseX - 4, houseY - 8, 68, 8);
+            ctx.fillRect(houseX, houseY - 16, 60, 8);
+            ctx.fillRect(houseX + 4, houseY - 24, 52, 8);
+            ctx.fillRect(houseX + 12, houseY - 32, 36, 8);
+            ctx.fillRect(houseX + 20, houseY - 40, 20, 8);
+
+            // Roof highlight
+            ctx.fillStyle = '#EF4444';
+            ctx.fillRect(houseX + 8, houseY - 32, 4, 32);
+
+            // Door (detailed)
+            ctx.fillStyle = '#422006';
+            ctx.fillRect(houseX + 20, houseY + 30, 20, 50);
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(houseX + 22, houseY + 32, 16, 46);
+
+            // Door panels
+            ctx.fillStyle = '#422006';
+            ctx.fillRect(houseX + 24, houseY + 36, 12, 18);
+            ctx.fillRect(houseX + 24, houseY + 58, 12, 18);
+
+            // Doorknob
+            ctx.fillStyle = '#FCD34D';
+            ctx.fillRect(houseX + 32, houseY + 56, 3, 3);
+
+            // Windows (pixel art)
+            ctx.fillStyle = '#0369A1';
+            ctx.fillRect(houseX + 8, houseY + 12, 16, 16);
+            ctx.fillRect(houseX + 36, houseY + 12, 16, 16);
+
+            // Window panes
+            ctx.fillStyle = '#075985';
+            ctx.fillRect(houseX + 8, houseY + 12, 16, 2);
+            ctx.fillRect(houseX + 8, houseY + 20, 16, 2);
+            ctx.fillRect(houseX + 14, houseY + 12, 2, 16);
+            ctx.fillRect(houseX + 36, houseY + 12, 16, 2);
+            ctx.fillRect(houseX + 36, houseY + 20, 16, 2);
+            ctx.fillRect(houseX + 42, houseY + 12, 2, 16);
+
+            // Window shine
+            ctx.fillStyle = '#7DD3FC';
+            ctx.fillRect(houseX + 10, houseY + 14, 3, 3);
+            ctx.fillRect(houseX + 38, houseY + 14, 3, 3);
         }
 
         function drawPlayer() {
-            // Cat body
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
+            const px = Math.floor(player.x);
+            const py = Math.floor(player.y);
 
-            // Ears
-            ctx.fillStyle = player.color;
-            ctx.beginPath();
-            ctx.moveTo(player.x + 5, player.y + 5);
-            ctx.lineTo(player.x + 5, player.y - 5);
-            ctx.lineTo(player.x + 12, player.y + 5);
-            ctx.fill();
+            // 16-bit pixel art cat
+            // Tail (pixelated)
+            ctx.fillStyle = '#D97706';
+            ctx.fillRect(px - 12, py + 24, 8, 4);
+            ctx.fillRect(px - 16, py + 20, 8, 4);
+            ctx.fillRect(px - 18, py + 16, 6, 4);
+            ctx.fillRect(px - 18, py + 12, 4, 4);
 
-            ctx.beginPath();
-            ctx.moveTo(player.x + player.width - 5, player.y + 5);
-            ctx.lineTo(player.x + player.width - 5, player.y - 5);
-            ctx.lineTo(player.x + player.width - 12, player.y + 5);
-            ctx.fill();
+            // Tail stripes
+            ctx.fillStyle = '#92400E';
+            ctx.fillRect(px - 14, py + 22, 4, 2);
+            ctx.fillRect(px - 17, py + 18, 4, 2);
+
+            // Body
+            ctx.fillStyle = player.color;
+            ctx.fillRect(px + 4, py + 16, 28, 20);
+
+            // Body shading
+            ctx.fillStyle = '#D97706';
+            ctx.fillRect(px + 6, py + 18, 24, 2);
+            ctx.fillRect(px + 6, py + 32, 24, 2);
+
+            // Legs
+            ctx.fillStyle = player.color;
+            ctx.fillRect(px + 8, py + 32, 6, 8);
+            ctx.fillRect(px + 22, py + 32, 6, 8);
+
+            // Paws
+            ctx.fillStyle = '#FFF7ED';
+            ctx.fillRect(px + 8, py + 36, 6, 4);
+            ctx.fillRect(px + 22, py + 36, 6, 4);
+
+            // Head
+            ctx.fillStyle = player.color;
+            ctx.fillRect(px + 12, py + 4, 20, 20);
+
+            // Ears (pixel art)
+            ctx.fillStyle = '#EA580C';
+            ctx.fillRect(px + 8, py, 8, 12);
+            ctx.fillRect(px + 28, py, 8, 12);
+
+            // Ear inner
+            ctx.fillStyle = '#FDBA74';
+            ctx.fillRect(px + 10, py + 4, 4, 4);
+            ctx.fillRect(px + 30, py + 4, 4, 4);
+
+            // Face outline
+            ctx.fillStyle = '#92400E';
+            ctx.fillRect(px + 12, py + 4, 20, 2);
+            ctx.fillRect(px + 12, py + 22, 20, 2);
+            ctx.fillRect(px + 12, py + 6, 2, 16);
+            ctx.fillRect(px + 30, py + 6, 2, 16);
 
             // Eyes
             ctx.fillStyle = 'white';
-            ctx.fillRect(player.x + 10, player.y + 12, 8, 8);
-            ctx.fillRect(player.x + 22, player.y + 12, 8, 8);
-            ctx.fillStyle = 'black';
-            ctx.fillRect(player.x + 13, player.y + 15, 3, 3);
-            ctx.fillRect(player.x + 25, player.y + 15, 3, 3);
+            ctx.fillRect(px + 16, py + 10, 6, 6);
+            ctx.fillRect(px + 26, py + 10, 6, 6);
 
-            // Tail
-            ctx.strokeStyle = player.color;
-            ctx.lineWidth = 5;
-            ctx.beginPath();
-            ctx.moveTo(player.x, player.y + player.height - 10);
-            ctx.quadraticCurveTo(
-                player.x - 15,
-                player.y + player.height - 5,
-                player.x - 20,
-                player.y + player.height - 20
-            );
-            ctx.stroke();
+            // Eye outline
+            ctx.fillStyle = 'black';
+            ctx.fillRect(px + 16, py + 10, 6, 1);
+            ctx.fillRect(px + 16, py + 15, 6, 1);
+            ctx.fillRect(px + 26, py + 10, 6, 1);
+            ctx.fillRect(px + 26, py + 15, 6, 1);
+
+            // Pupils
+            ctx.fillStyle = '#16A34A';
+            ctx.fillRect(px + 18, py + 12, 3, 3);
+            ctx.fillRect(px + 28, py + 12, 3, 3);
+
+            // Pupils highlight
+            ctx.fillStyle = 'white';
+            ctx.fillRect(px + 19, py + 12, 1, 1);
+            ctx.fillRect(px + 29, py + 12, 1, 1);
+
+            // Nose
+            ctx.fillStyle = '#EC4899';
+            ctx.fillRect(px + 22, py + 17, 2, 2);
+
+            // Whiskers
+            ctx.fillStyle = 'black';
+            ctx.fillRect(px + 8, py + 16, 4, 1);
+            ctx.fillRect(px + 8, py + 18, 4, 1);
+            ctx.fillRect(px + 32, py + 16, 4, 1);
+            ctx.fillRect(px + 32, py + 18, 4, 1);
+
+            // Chest/belly
+            ctx.fillStyle = '#FFF7ED';
+            ctx.fillRect(px + 16, py + 24, 12, 8);
         }
 
         function drawCoins() {
+            const coinFrame = Math.floor(Date.now() / 150) % 4;
+
             currentLevel.coins.forEach(coin => {
                 if (!coin.collected) {
-                    // Coin
-                    ctx.fillStyle = '#FFD700';
-                    ctx.beginPath();
-                    ctx.arc(coin.x, coin.y, 12, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = '#FFA500';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
+                    const cx = Math.floor(coin.x);
+                    const cy = Math.floor(coin.y);
 
-                    // Sparkle
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(coin.x - 3, coin.y - 8, 2, 4);
-                    ctx.fillRect(coin.x + 3, coin.y - 4, 2, 4);
+                    // 16-bit animated coin
+                    if (coinFrame === 0 || coinFrame === 2) {
+                        // Full width coin
+                        ctx.fillStyle = '#B45309';
+                        ctx.fillRect(cx - 8, cy - 8, 16, 16);
+
+                        ctx.fillStyle = '#FCD34D';
+                        ctx.fillRect(cx - 6, cy - 6, 12, 12);
+
+                        ctx.fillStyle = '#EAB308';
+                        ctx.fillRect(cx - 4, cy - 4, 8, 8);
+
+                        // Coin detail
+                        ctx.fillStyle = '#F59E0B';
+                        ctx.fillRect(cx - 2, cy - 2, 4, 4);
+
+                        // Outer ring
+                        ctx.fillStyle = '#92400E';
+                        ctx.fillRect(cx - 8, cy - 8, 16, 2);
+                        ctx.fillRect(cx - 8, cy + 6, 16, 2);
+                        ctx.fillRect(cx - 8, cy - 6, 2, 12);
+                        ctx.fillRect(cx + 6, cy - 6, 2, 12);
+                    } else if (coinFrame === 1) {
+                        // Medium width
+                        ctx.fillStyle = '#B45309';
+                        ctx.fillRect(cx - 6, cy - 8, 12, 16);
+
+                        ctx.fillStyle = '#FCD34D';
+                        ctx.fillRect(cx - 4, cy - 6, 8, 12);
+
+                        ctx.fillStyle = '#EAB308';
+                        ctx.fillRect(cx - 3, cy - 4, 6, 8);
+
+                        ctx.fillStyle = '#92400E';
+                        ctx.fillRect(cx - 6, cy - 8, 12, 2);
+                        ctx.fillRect(cx - 6, cy + 6, 12, 2);
+                    } else {
+                        // Thin coin
+                        ctx.fillStyle = '#B45309';
+                        ctx.fillRect(cx - 3, cy - 8, 6, 16);
+
+                        ctx.fillStyle = '#FCD34D';
+                        ctx.fillRect(cx - 2, cy - 6, 4, 12);
+
+                        ctx.fillStyle = '#92400E';
+                        ctx.fillRect(cx - 3, cy - 8, 6, 2);
+                        ctx.fillRect(cx - 3, cy + 6, 6, 2);
+                    }
+
+                    // Sparkle effect
+                    if (coinFrame === 0) {
+                        ctx.fillStyle = '#FEF9C3';
+                        ctx.fillRect(cx - 10, cy - 10, 2, 2);
+                        ctx.fillRect(cx + 8, cy + 8, 2, 2);
+                        ctx.fillRect(cx + 8, cy - 10, 2, 2);
+                    }
                 }
             });
         }
@@ -745,57 +917,166 @@
         function drawFood() {
             currentLevel.food.forEach(food => {
                 if (!food.collected) {
-                    // Meat/bone
-                    ctx.fillStyle = '#CD853F';
-                    ctx.fillRect(food.x - 10, food.y - 8, 20, 16);
+                    const fx = Math.floor(food.x);
+                    const fy = Math.floor(food.y);
 
-                    ctx.fillStyle = '#DEB887';
-                    ctx.beginPath();
-                    ctx.arc(food.x - 10, food.y, 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(food.x + 10, food.y, 6, 0, Math.PI * 2);
-                    ctx.fill();
+                    // 16-bit pixel art fish
+                    // Tail
+                    ctx.fillStyle = '#0EA5E9';
+                    ctx.fillRect(fx - 12, fy - 4, 4, 8);
+                    ctx.fillRect(fx - 14, fy - 6, 4, 4);
+                    ctx.fillRect(fx - 14, fy + 2, 4, 4);
+
+                    // Body
+                    ctx.fillStyle = '#38BDF8';
+                    ctx.fillRect(fx - 8, fy - 6, 14, 12);
+
+                    // Body highlight
+                    ctx.fillStyle = '#7DD3FC';
+                    ctx.fillRect(fx - 6, fy - 4, 10, 2);
+
+                    // Belly
+                    ctx.fillStyle = '#E0F2FE';
+                    ctx.fillRect(fx - 6, fy, 10, 4);
+
+                    // Head
+                    ctx.fillStyle = '#0284C7';
+                    ctx.fillRect(fx + 4, fy - 4, 4, 8);
+
+                    // Eye
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(fx + 4, fy - 2, 2, 2);
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(fx + 5, fy - 2, 1, 1);
+
+                    // Fins
+                    ctx.fillStyle = '#0EA5E9';
+                    ctx.fillRect(fx - 2, fy - 8, 4, 4);
+                    ctx.fillRect(fx - 2, fy + 4, 4, 4);
+
+                    // Outline
+                    ctx.fillStyle = '#075985';
+                    // Top
+                    ctx.fillRect(fx - 8, fy - 6, 12, 1);
+                    // Bottom
+                    ctx.fillRect(fx - 8, fy + 5, 12, 1);
+                    // Head point
+                    ctx.fillRect(fx + 6, fy - 2, 2, 4);
+
+                    // Fish bones (crossed)
+                    ctx.fillStyle = '#BAE6FD';
+                    ctx.fillRect(fx - 4, fy, 1, 4);
+                    ctx.fillRect(fx - 2, fy, 1, 4);
+                    ctx.fillRect(fx, fy, 1, 4);
                 }
             });
         }
 
         function drawCats() {
             currentLevel.cats.forEach(cat => {
-                const catColor = cat.friendly ? '#9370DB' : '#696969';
+                const cx = Math.floor(cat.x);
+                const cy = Math.floor(cat.y);
+                const catColor = cat.friendly ? '#A78BFA' : '#6B7280';
+                const darkColor = cat.friendly ? '#7C3AED' : '#374151';
 
-                // Cat body
+                // 16-bit pixel art NPC cat (sitting position)
+                // Tail (curled)
+                ctx.fillStyle = darkColor;
+                ctx.fillRect(cx - 8, cy + 28, 6, 4);
+                ctx.fillRect(cx - 6, cy + 24, 4, 4);
+                ctx.fillRect(cx - 4, cy + 20, 4, 4);
+
+                // Body (sitting)
                 ctx.fillStyle = catColor;
-                ctx.fillRect(cat.x, cat.y, 40, 40);
+                ctx.fillRect(cx + 4, cy + 20, 24, 20);
 
-                // Ears
-                ctx.beginPath();
-                ctx.moveTo(cat.x + 5, cat.y + 5);
-                ctx.lineTo(cat.x + 5, cat.y - 5);
-                ctx.lineTo(cat.x + 12, cat.y + 5);
-                ctx.fill();
+                // Body shading
+                ctx.fillStyle = darkColor;
+                ctx.fillRect(cx + 6, cy + 22, 20, 2);
 
-                ctx.beginPath();
-                ctx.moveTo(cat.x + 35, cat.y + 5);
-                ctx.lineTo(cat.x + 35, cat.y - 5);
-                ctx.lineTo(cat.x + 28, cat.y + 5);
-                ctx.fill();
+                // Front paws
+                ctx.fillStyle = catColor;
+                ctx.fillRect(cx + 8, cy + 36, 6, 4);
+                ctx.fillRect(cx + 18, cy + 36, 6, 4);
+
+                // Paw pads
+                ctx.fillStyle = '#FEE2E2';
+                ctx.fillRect(cx + 10, cy + 36, 2, 2);
+                ctx.fillRect(cx + 20, cy + 36, 2, 2);
+
+                // Head
+                ctx.fillStyle = catColor;
+                ctx.fillRect(cx + 8, cy + 4, 20, 20);
+
+                // Ears (pixel art)
+                ctx.fillStyle = cat.friendly ? '#8B5CF6' : '#4B5563';
+                ctx.fillRect(cx + 4, cy, 8, 12);
+                ctx.fillRect(cx + 24, cy, 8, 12);
+
+                // Ear inner
+                ctx.fillStyle = '#DDD6FE';
+                ctx.fillRect(cx + 6, cy + 4, 4, 4);
+                ctx.fillRect(cx + 26, cy + 4, 4, 4);
+
+                // Face details
+                ctx.fillStyle = darkColor;
+                ctx.fillRect(cx + 8, cy + 4, 20, 2);
 
                 // Eyes
                 ctx.fillStyle = 'white';
-                ctx.fillRect(cat.x + 10, cat.y + 12, 8, 8);
-                ctx.fillRect(cat.x + 22, cat.y + 12, 8, 8);
-                ctx.fillStyle = 'black';
-                ctx.fillRect(cat.x + 13, cat.y + 15, 3, 3);
-                ctx.fillRect(cat.x + 25, cat.y + 15, 3, 3);
+                ctx.fillRect(cx + 12, cy + 10, 6, 6);
+                ctx.fillRect(cx + 22, cy + 10, 6, 6);
 
-                // Name tag
-                ctx.fillStyle = 'white';
-                ctx.fillRect(cat.x - 10, cat.y - 20, 60, 15);
+                // Eye outline
                 ctx.fillStyle = 'black';
-                ctx.font = '10px Arial';
+                ctx.fillRect(cx + 12, cy + 10, 6, 1);
+                ctx.fillRect(cx + 12, cy + 15, 6, 1);
+                ctx.fillRect(cx + 22, cy + 10, 6, 1);
+                ctx.fillRect(cx + 22, cy + 15, 6, 1);
+
+                // Pupils (different for friendly/unfriendly)
+                if (cat.friendly) {
+                    ctx.fillStyle = '#6366F1';
+                    ctx.fillRect(cx + 14, cy + 12, 3, 3);
+                    ctx.fillRect(cx + 24, cy + 12, 3, 3);
+                } else {
+                    ctx.fillStyle = '#DC2626';
+                    ctx.fillRect(cx + 14, cy + 12, 3, 2);
+                    ctx.fillRect(cx + 24, cy + 12, 3, 2);
+                }
+
+                // Pupil highlight
+                ctx.fillStyle = 'white';
+                ctx.fillRect(cx + 15, cy + 12, 1, 1);
+                ctx.fillRect(cx + 25, cy + 12, 1, 1);
+
+                // Nose
+                ctx.fillStyle = '#F472B6';
+                ctx.fillRect(cx + 18, cy + 17, 2, 2);
+
+                // Whiskers
+                ctx.fillStyle = 'black';
+                ctx.fillRect(cx + 4, cy + 16, 4, 1);
+                ctx.fillRect(cx + 4, cy + 18, 4, 1);
+                ctx.fillRect(cx + 28, cy + 16, 4, 1);
+                ctx.fillRect(cx + 28, cy + 18, 4, 1);
+
+                // Name tag (pixel art style)
+                ctx.fillStyle = cat.friendly ? '#DDD6FE' : '#E5E7EB';
+                ctx.fillRect(cx - 8, cy - 18, 52, 14);
+
+                // Tag border
+                ctx.fillStyle = darkColor;
+                ctx.fillRect(cx - 8, cy - 18, 52, 2);
+                ctx.fillRect(cx - 8, cy - 6, 52, 2);
+                ctx.fillRect(cx - 8, cy - 16, 2, 12);
+                ctx.fillRect(cx + 42, cy - 16, 2, 12);
+
+                // Name
+                ctx.fillStyle = 'black';
+                ctx.font = 'bold 10px monospace';
                 ctx.textAlign = 'center';
-                ctx.fillText(cat.name, cat.x + 20, cat.y - 9);
+                ctx.fillText(cat.name, cx + 18, cy - 7);
 
                 // Interaction hint
                 const distance = Math.sqrt(
@@ -804,12 +1085,20 @@
                 );
 
                 if (distance < 80 && !cat.talked && game.state === 'playing') {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                    ctx.fillRect(cat.x - 20, cat.y + 50, 80, 25);
+                    // Pixel art speech bubble hint
+                    ctx.fillStyle = '#FEFCE8';
+                    ctx.fillRect(cx - 20, cy + 48, 76, 20);
+
+                    ctx.fillStyle = '#CA8A04';
+                    ctx.fillRect(cx - 20, cy + 48, 76, 2);
+                    ctx.fillRect(cx - 20, cy + 66, 76, 2);
+                    ctx.fillRect(cx - 20, cy + 50, 2, 16);
+                    ctx.fillRect(cx + 54, cy + 50, 2, 16);
+
                     ctx.fillStyle = 'black';
-                    ctx.font = '12px Arial';
+                    ctx.font = 'bold 11px monospace';
                     ctx.textAlign = 'center';
-                    ctx.fillText('Press SPACE', cat.x + 20, cat.y + 67);
+                    ctx.fillText('SPACE/TAP', cx + 18, cy + 61);
                 }
             });
         }
