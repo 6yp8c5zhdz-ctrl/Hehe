@@ -295,6 +295,7 @@
         const levels = [
             {
                 name: 'Training',
+                scene: 'river',
                 coins: [
                     { x: 200, y: 450, collected: false },
                     { x: 300, y: 400, collected: false },
@@ -305,10 +306,12 @@
                     { x: 350, y: 450, collected: false }
                 ],
                 cats: [],
+                bench: null,
                 homeX: 700
             },
             {
-                name: 'Level 1',
+                name: 'Riverside Path',
+                scene: 'river',
                 coins: [
                     { x: 200, y: 450, collected: false },
                     { x: 300, y: 350, collected: false },
@@ -323,10 +326,12 @@
                 cats: [
                     { x: 350, y: 300, name: 'Whiskers', friendly: true }
                 ],
+                bench: null,
                 homeX: 700
             },
             {
-                name: 'Level 2',
+                name: 'Forest Trail',
+                scene: 'forest',
                 coins: [
                     { x: 180, y: 450, collected: false },
                     { x: 280, y: 350, collected: false },
@@ -344,10 +349,12 @@
                     { x: 300, y: 280, name: 'Mittens', friendly: true },
                     { x: 500, y: 280, name: 'Grumpy', friendly: Math.random() > 0.5 }
                 ],
+                bench: null,
                 homeX: 700
             },
             {
-                name: 'Level 3',
+                name: 'Deep Woods',
+                scene: 'forest',
                 coins: [
                     { x: 150, y: 500, collected: false },
                     { x: 250, y: 400, collected: false },
@@ -368,6 +375,119 @@
                     { x: 400, y: 180, name: 'Luna', friendly: true },
                     { x: 550, y: 250, name: 'Tiger', friendly: Math.random() > 0.5 }
                 ],
+                bench: null,
+                homeX: 700
+            },
+            {
+                name: 'Village Square',
+                scene: 'village',
+                coins: [
+                    { x: 170, y: 480, collected: false },
+                    { x: 240, y: 420, collected: false },
+                    { x: 320, y: 360, collected: false },
+                    { x: 400, y: 420, collected: false },
+                    { x: 480, y: 360, collected: false },
+                    { x: 560, y: 480, collected: false },
+                    { x: 620, y: 420, collected: false }
+                ],
+                food: [
+                    { x: 210, y: 520, collected: false },
+                    { x: 360, y: 480, collected: false },
+                    { x: 440, y: 520, collected: false },
+                    { x: 520, y: 420, collected: false },
+                    { x: 640, y: 480, collected: false }
+                ],
+                cats: [
+                    { x: 280, y: 340, name: 'Bella', friendly: true },
+                    { x: 450, y: 280, name: 'Felix', friendly: Math.random() > 0.4 },
+                    { x: 580, y: 340, name: 'Oliver', friendly: Math.random() > 0.6 }
+                ],
+                bench: null,
+                homeX: 700
+            },
+            {
+                name: 'Castle Courtyard',
+                scene: 'castle',
+                coins: [
+                    { x: 200, y: 450, collected: false },
+                    { x: 280, y: 380, collected: false },
+                    { x: 360, y: 320, collected: false },
+                    { x: 500, y: 350, collected: false },
+                    { x: 580, y: 420, collected: false },
+                    { x: 640, y: 480, collected: false }
+                ],
+                food: [
+                    { x: 240, y: 500, collected: false },
+                    { x: 320, y: 440, collected: false },
+                    { x: 460, y: 400, collected: false },
+                    { x: 540, y: 480, collected: false },
+                    { x: 620, y: 380, collected: false }
+                ],
+                cats: [
+                    { x: 300, y: 300, name: 'Sir Purr', friendly: true },
+                    { x: 520, y: 280, name: 'Princess', friendly: true }
+                ],
+                bench: { x: 420, y: 500, used: false },
+                homeX: 700
+            },
+            {
+                name: 'Mountain Pass',
+                scene: 'mountain',
+                coins: [
+                    { x: 160, y: 520, collected: false },
+                    { x: 220, y: 460, collected: false },
+                    { x: 300, y: 380, collected: false },
+                    { x: 380, y: 300, collected: false },
+                    { x: 460, y: 240, collected: false },
+                    { x: 540, y: 300, collected: false },
+                    { x: 620, y: 380, collected: false },
+                    { x: 680, y: 460, collected: false }
+                ],
+                food: [
+                    { x: 190, y: 490, collected: false },
+                    { x: 260, y: 420, collected: false },
+                    { x: 340, y: 340, collected: false },
+                    { x: 420, y: 270, collected: false },
+                    { x: 500, y: 340, collected: false },
+                    { x: 580, y: 420, collected: false }
+                ],
+                cats: [
+                    { x: 270, y: 400, name: 'Rocky', friendly: Math.random() > 0.4 },
+                    { x: 400, y: 260, name: 'Summit', friendly: true },
+                    { x: 540, y: 320, name: 'Cliff', friendly: Math.random() > 0.5 },
+                    { x: 650, y: 400, name: 'Peak', friendly: Math.random() > 0.6 }
+                ],
+                bench: null,
+                homeX: 700
+            },
+            {
+                name: 'Royal Gardens',
+                scene: 'castle',
+                coins: [
+                    { x: 180, y: 500, collected: false },
+                    { x: 240, y: 440, collected: false },
+                    { x: 300, y: 380, collected: false },
+                    { x: 380, y: 320, collected: false },
+                    { x: 460, y: 380, collected: false },
+                    { x: 540, y: 440, collected: false },
+                    { x: 620, y: 380, collected: false },
+                    { x: 680, y: 500, collected: false }
+                ],
+                food: [
+                    { x: 210, y: 470, collected: false },
+                    { x: 270, y: 410, collected: false },
+                    { x: 340, y: 350, collected: false },
+                    { x: 420, y: 350, collected: false },
+                    { x: 500, y: 410, collected: false },
+                    { x: 580, y: 470, collected: false },
+                    { x: 650, y: 440, collected: false }
+                ],
+                cats: [
+                    { x: 250, y: 380, name: 'Duke', friendly: true },
+                    { x: 400, y: 280, name: 'Duchess', friendly: Math.random() > 0.3 },
+                    { x: 550, y: 360, name: 'Baron', friendly: Math.random() > 0.5 }
+                ],
+                bench: { x: 450, y: 480, used: false },
                 homeX: 700
             }
         ];
@@ -415,6 +535,7 @@
 
             if (e.key === ' ' && game.state === 'playing') {
                 checkCatInteraction();
+                checkBenchInteraction();
             }
         });
 
@@ -466,6 +587,7 @@
             e.preventDefault();
             if (game.state === 'playing') {
                 checkCatInteraction();
+                checkBenchInteraction();
             }
         });
 
@@ -589,6 +711,33 @@
             }
         }
 
+        function checkBenchInteraction() {
+            if (!currentLevel.bench || currentLevel.bench.used) return;
+
+            const distance = Math.sqrt(
+                Math.pow(player.x - currentLevel.bench.x, 2) +
+                Math.pow(player.y - currentLevel.bench.y, 2)
+            );
+
+            if (distance < 80) {
+                currentLevel.bench.used = true;
+                game.state = 'dialogue';
+                showModal(
+                    '🪑 Rest at the Bench',
+                    'You sit down on the comfortable bench to rest. The peaceful moment refreshes you, and you find 10 coins that someone left behind!',
+                    [{
+                        text: 'Continue Journey',
+                        action: () => {
+                            game.coins += 10;
+                            updateUI();
+                            hideModal();
+                            game.state = 'playing';
+                        }
+                    }]
+                );
+            }
+        }
+
         function reachHome() {
             game.state = 'party';
             game.partyTime = 0;
@@ -635,7 +784,33 @@
 
         // Drawing functions
         function drawBackground() {
-            // River (left side) - 16-bit style water
+            // Draw scene based on level type
+            switch(currentLevel.scene) {
+                case 'river':
+                    drawRiverScene();
+                    break;
+                case 'forest':
+                    drawForestScene();
+                    break;
+                case 'village':
+                    drawVillageScene();
+                    break;
+                case 'castle':
+                    drawCastleScene();
+                    break;
+                case 'mountain':
+                    drawMountainScene();
+                    break;
+                default:
+                    drawRiverScene();
+            }
+
+            // Always draw the home area
+            drawHome();
+        }
+
+        function drawRiverScene() {
+            // River (left side)
             const waterColors = ['#1E40AF', '#2563EB', '#3B82F6'];
             for (let y = 0; y < canvas.height; y += 16) {
                 for (let x = 0; x < 150; x += 16) {
@@ -644,7 +819,6 @@
                 }
             }
 
-            // Animated water waves (16-bit style)
             const waveOffset = Math.floor(Date.now() / 200) % 16;
             ctx.fillStyle = '#60A5FA';
             for (let y = 0; y < canvas.height; y += 32) {
@@ -652,33 +826,151 @@
                 ctx.fillRect(0, y + waveOffset + 16, 150, 4);
             }
 
-            // Path (middle) - Tile-based
+            // Path
             const dirtColors = ['#8B7355', '#A0826D', '#6B5842'];
             for (let y = 0; y < canvas.height; y += 16) {
-                for (let x = 150; x < canvas.width - 100; x += 16) {
+                for (let x = 150; x < currentLevel.homeX; x += 16) {
                     const tileIndex = ((x / 16) + (y / 16)) % 3;
                     ctx.fillStyle = dirtColors[Math.floor(tileIndex)];
                     ctx.fillRect(x, y, 16, 16);
+                }
+            }
+        }
 
-                    // Add texture
-                    if (Math.random() > 0.7) {
-                        ctx.fillStyle = '#5D4A3A';
-                        ctx.fillRect(x + 4, y + 4, 4, 4);
-                    }
+        function drawForestScene() {
+            // Dark forest ground
+            const grassColors = ['#2F4F2F', '#3B5F3B', '#274227'];
+            for (let y = 0; y < canvas.height; y += 16) {
+                for (let x = 0; x < currentLevel.homeX; x += 16) {
+                    const tileIndex = ((x / 16) + (y / 16)) % 3;
+                    ctx.fillStyle = grassColors[Math.floor(tileIndex)];
+                    ctx.fillRect(x, y, 16, 16);
                 }
             }
 
-            // Grass tufts (16-bit pixel art)
-            ctx.fillStyle = '#6B8E23';
-            for (let i = 0; i < 30; i++) {
-                const gx = 150 + (i * 20) % (canvas.width - 250);
-                const gy = (i * 37) % canvas.height;
-                ctx.fillRect(gx, gy, 4, 8);
-                ctx.fillRect(gx - 4, gy + 4, 4, 4);
-                ctx.fillRect(gx + 4, gy + 4, 4, 4);
+            // Trees
+            for (let i = 0; i < 10; i++) {
+                const tx = (i * 70 + 30) % (currentLevel.homeX - 50);
+                const ty = (i * 83) % (canvas.height - 80);
+
+                // Tree trunk
+                ctx.fillStyle = '#654321';
+                ctx.fillRect(tx, ty + 40, 16, 40);
+
+                // Tree foliage
+                ctx.fillStyle = '#228B22';
+                ctx.fillRect(tx - 12, ty, 40, 50);
+                ctx.fillStyle = '#32CD32';
+                ctx.fillRect(tx - 8, ty + 10, 32, 30);
+            }
+        }
+
+        function drawVillageScene() {
+            // Cobblestone ground
+            const stoneColors = ['#808080', '#696969', '#778899'];
+            for (let y = 0; y < canvas.height; y += 16) {
+                for (let x = 0; x < currentLevel.homeX; x += 16) {
+                    const tileIndex = ((x / 16) + (y / 16)) % 3;
+                    ctx.fillStyle = stoneColors[Math.floor(tileIndex)];
+                    ctx.fillRect(x, y, 16, 16);
+
+                    // Stone outlines
+                    ctx.fillStyle = '#505050';
+                    ctx.fillRect(x, y, 16, 1);
+                    ctx.fillRect(x, y, 1, 16);
+                }
             }
 
-            // Home area (right side) - 16-bit golden tiles
+            // Village buildings (background)
+            for (let i = 0; i < 3; i++) {
+                const bx = 50 + i * 200;
+                const by = 100;
+
+                // Building
+                ctx.fillStyle = '#D2691E';
+                ctx.fillRect(bx, by, 60, 80);
+
+                // Roof
+                ctx.fillStyle = '#8B0000';
+                ctx.fillRect(bx - 8, by, 76, 8);
+                ctx.fillRect(bx - 4, by - 8, 68, 8);
+
+                // Window
+                ctx.fillStyle = '#FFD700';
+                ctx.fillRect(bx + 20, by + 20, 20, 20);
+            }
+        }
+
+        function drawCastleScene() {
+            // Stone castle floor
+            const stoneColors = ['#A9A9A9', '#C0C0C0', '#DCDCDC'];
+            for (let y = 0; y < canvas.height; y += 16) {
+                for (let x = 0; x < currentLevel.homeX; x += 16) {
+                    const tileIndex = ((x / 16) + (y / 16)) % 3;
+                    ctx.fillStyle = stoneColors[Math.floor(tileIndex)];
+                    ctx.fillRect(x, y, 16, 16);
+                }
+            }
+
+            // Castle wall (background)
+            ctx.fillStyle = '#696969';
+            ctx.fillRect(0, 0, currentLevel.homeX, 120);
+
+            // Battlements
+            for (let i = 0; i < 20; i++) {
+                if (i % 2 === 0) {
+                    ctx.fillStyle = '#505050';
+                    ctx.fillRect(i * 35, 0, 25, 30);
+                }
+            }
+
+            // Castle towers
+            ctx.fillStyle = '#696969';
+            ctx.fillRect(50, 40, 40, 100);
+            ctx.fillRect(300, 40, 40, 100);
+
+            // Tower tops
+            ctx.fillStyle = '#8B0000';
+            ctx.fillRect(45, 30, 50, 15);
+            ctx.fillRect(295, 30, 50, 15);
+        }
+
+        function drawMountainScene() {
+            // Sky gradient
+            for (let y = 0; y < canvas.height; y += 16) {
+                const shade = Math.floor((y / canvas.height) * 100);
+                ctx.fillStyle = `hsl(200, 60%, ${70 - shade/5}%)`;
+                ctx.fillRect(0, y, currentLevel.homeX, 16);
+            }
+
+            // Mountains (background)
+            ctx.fillStyle = '#8B7355';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height);
+            ctx.lineTo(100, 300);
+            ctx.lineTo(200, canvas.height);
+            ctx.fill();
+
+            ctx.fillStyle = '#A0826D';
+            ctx.beginPath();
+            ctx.moveTo(150, canvas.height);
+            ctx.lineTo(280, 200);
+            ctx.lineTo(400, canvas.height);
+            ctx.fill();
+
+            // Rocky path
+            const rockColors = ['#8B7355', '#A0826D', '#6B5842'];
+            for (let y = canvas.height - 150; y < canvas.height; y += 16) {
+                for (let x = 100; x < currentLevel.homeX - 100; x += 16) {
+                    const tileIndex = ((x / 16) + (y / 16)) % 3;
+                    ctx.fillStyle = rockColors[Math.floor(tileIndex)];
+                    ctx.fillRect(x, y, 16, 16);
+                }
+            }
+        }
+
+        function drawHome() {
+            // Home area
             for (let y = 0; y < canvas.height; y += 16) {
                 for (let x = currentLevel.homeX; x < canvas.width; x += 16) {
                     const shade = ((x + y) / 16) % 2 === 0 ? '#FFD700' : '#FFC800';
@@ -687,11 +979,10 @@
                 }
             }
 
-            // 16-bit pixel art house
+            // House
             const houseX = currentLevel.homeX + 20;
             const houseY = canvas.height - 200;
 
-            // House walls
             ctx.fillStyle = '#8B4513';
             ctx.fillRect(houseX, houseY, 60, 80);
             ctx.fillStyle = '#654321';
@@ -703,7 +994,7 @@
                 }
             }
 
-            // Roof (pixel art)
+            // Roof
             ctx.fillStyle = '#DC2626';
             ctx.fillRect(houseX - 8, houseY, 76, 8);
             ctx.fillRect(houseX - 4, houseY - 8, 68, 8);
@@ -712,31 +1003,24 @@
             ctx.fillRect(houseX + 12, houseY - 32, 36, 8);
             ctx.fillRect(houseX + 20, houseY - 40, 20, 8);
 
-            // Roof highlight
             ctx.fillStyle = '#EF4444';
             ctx.fillRect(houseX + 8, houseY - 32, 4, 32);
 
-            // Door (detailed)
+            // Door
             ctx.fillStyle = '#422006';
             ctx.fillRect(houseX + 20, houseY + 30, 20, 50);
             ctx.fillStyle = '#654321';
             ctx.fillRect(houseX + 22, houseY + 32, 16, 46);
-
-            // Door panels
             ctx.fillStyle = '#422006';
             ctx.fillRect(houseX + 24, houseY + 36, 12, 18);
             ctx.fillRect(houseX + 24, houseY + 58, 12, 18);
-
-            // Doorknob
             ctx.fillStyle = '#FCD34D';
             ctx.fillRect(houseX + 32, houseY + 56, 3, 3);
 
-            // Windows (pixel art)
+            // Windows
             ctx.fillStyle = '#0369A1';
             ctx.fillRect(houseX + 8, houseY + 12, 16, 16);
             ctx.fillRect(houseX + 36, houseY + 12, 16, 16);
-
-            // Window panes
             ctx.fillStyle = '#075985';
             ctx.fillRect(houseX + 8, houseY + 12, 16, 2);
             ctx.fillRect(houseX + 8, houseY + 20, 16, 2);
@@ -744,11 +1028,57 @@
             ctx.fillRect(houseX + 36, houseY + 12, 16, 2);
             ctx.fillRect(houseX + 36, houseY + 20, 16, 2);
             ctx.fillRect(houseX + 42, houseY + 12, 2, 16);
-
-            // Window shine
             ctx.fillStyle = '#7DD3FC';
             ctx.fillRect(houseX + 10, houseY + 14, 3, 3);
             ctx.fillRect(houseX + 38, houseY + 14, 3, 3);
+        }
+
+        function drawBench() {
+            if (!currentLevel.bench) return;
+
+            const bx = Math.floor(currentLevel.bench.x);
+            const by = Math.floor(currentLevel.bench.y);
+
+            // Bench seat
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(bx - 20, by, 40, 8);
+
+            // Bench back
+            ctx.fillRect(bx - 20, by - 16, 4, 20);
+            ctx.fillRect(bx + 16, by - 16, 4, 20);
+            ctx.fillRect(bx - 20, by - 16, 40, 4);
+
+            // Bench legs
+            ctx.fillRect(bx - 16, by + 8, 4, 12);
+            ctx.fillRect(bx + 12, by + 8, 4, 12);
+
+            // Shading
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(bx - 18, by + 2, 36, 2);
+
+            // Interaction hint
+            if (!currentLevel.bench.used) {
+                const distance = Math.sqrt(
+                    Math.pow(player.x - currentLevel.bench.x, 2) +
+                    Math.pow(player.y - currentLevel.bench.y, 2)
+                );
+
+                if (distance < 80 && game.state === 'playing') {
+                    ctx.fillStyle = '#FEFCE8';
+                    ctx.fillRect(bx - 30, by - 40, 60, 20);
+
+                    ctx.fillStyle = '#CA8A04';
+                    ctx.fillRect(bx - 30, by - 40, 60, 2);
+                    ctx.fillRect(bx - 30, by - 22, 60, 2);
+                    ctx.fillRect(bx - 30, by - 38, 2, 16);
+                    ctx.fillRect(bx + 28, by - 38, 2, 16);
+
+                    ctx.fillStyle = 'black';
+                    ctx.font = 'bold 10px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('SPACE/TAP', bx, by - 27);
+                }
+            }
         }
 
         function drawPlayer() {
@@ -1146,6 +1476,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             drawBackground();
+            drawBench();
             drawCoins();
             drawFood();
             drawCats();
@@ -1156,8 +1487,7 @@
         function updateUI() {
             document.getElementById('coinCount').textContent = game.coins;
             document.getElementById('foodCount').textContent = game.food;
-            document.getElementById('levelCount').textContent =
-                game.level === 0 ? 'Training' : `${game.level} of ${levels.length - 1}`;
+            document.getElementById('levelCount').textContent = currentLevel.name;
         }
 
         // Modal functions
